@@ -5,15 +5,13 @@ Created on Wed Dec 28 14:00:42 2022
 @author: Skye
 """
 
-import csv  # analysis:ignore
-import pandas as pd  # analysis:ignore
-import numpy as np  # analysis:ignore
-from operator import itemgetter  # analysis:ignore
+import pandas as pd
+import numpy as np
 
-from config import atlantic, pit, full_day, days_advance_low, days_advance_high, date_range, use_date, filter_on, source_filter, activity_filter, activities, equipment
-from config import file_location as file_loc  # analysis:ignore
+from config import file_location as file_loc
+from config import activities, equipment
 
-from long_bookings import long_bookings, add_many_rows
+from long_bookings import add_many_rows
 
 
 # %% importing function
@@ -22,15 +20,14 @@ def import_csv(file_location):
     file_data = pd.read_csv(file_location, encoding='ISO 8859-1')
 
     file_parsed = file_data[['Source', 'Date Booked', 'Date of Activity', 'Start Time',
-                             'End Time', 'Studio', 'Name', 'Event Name', '# of Attendees',
-                             'Activity', 'Equipment', 'Days Prev', 'Hours']]
+                             'End Time', 'Studio', 'Name', 'Event Name', '# of Attendees', 'Activity', 'Equipment', 'Days Prev', 'Hours']]
     file_parsed = file_parsed.iloc[:(file_parsed['Date Booked'].last_valid_index())]
     file_parsed = add_many_rows(file_parsed)
     file_fixed = format_df(file_parsed)
-    if filter_on == True:
-        file_fixed = filter_stats_data(file_fixed)
     for col in file_fixed:
         file_fixed[col] = file_fixed[col].convert_dtypes()
+    file_fixed = file_fixed.sort_values(by='Date of Activity', ascending=True)
+    file_fixed = (file_fixed.reset_index()).iloc[: , 1:]
     return file_fixed
 
 
@@ -58,10 +55,10 @@ def string_and_nan_format(val):
     if pd.isnull(val) == True:
         return val
     else:
-        return str(val)
+        return str(val).title().strip()
 
 
-def prev_check(days_prev):  # check how I did this
+def prev_check(days_prev):
     if days_prev >= 0:
         return int(days_prev)
     else:
@@ -77,9 +74,9 @@ def real_check(date_booking):
 
 def name_event(name, event):
     if pd.isnull(name) == True:
-        return event
+        return str(event).title().strip()
     else:
-        return name
+        return str(name).title().strip()
 
 
 def type_check(studio):
@@ -105,15 +102,22 @@ def hours_check(hours):
         return round(float(hours), 1)
 
 
-def time_format(time):
+def time_format(time, complete, se):
     if pd.isnull(time):
         return time
+    if pd.to_datetime(time) < pd.to_datetime("20200123"):
+        return np.nan
+    if complete == True:
+        if se == 'start':
+            return pd.to_datetime('00:00:00')
+        if se == 'end':
+            return pd.to_datetime('23:00:00')
     else:
-        return pd.to_datetime(time).hour
+        return pd.to_datetime(time)
 
 def source_check(source):
     if pd.isnull(source) == True: return source
-    source = str(source)
+    source = str(source).title().strip()
     if 'walk' in source.lower():
         return "Walk-In"
     else:
@@ -122,11 +126,13 @@ def source_check(source):
 
 def format_df(dataframe):
     df = dataframe.copy()
+    drop_list = []
     for i in df.index:
+        if pd.isna(df.loc[i, 'Hours']):
+            drop_list.append(i)
         df.loc[i, 'Source'] = source_check(df.loc[i, 'Source'])
         df.loc[i, 'Date Booked'] = real_check(df.loc[i, 'Date Booked'])
-        df.loc[i, 'Date of Activity'] = real_check(
-            pd.to_datetime(df.loc[i, 'Date of Activity']))
+        df.loc[i, 'Date of Activity'] = real_check(df.loc[i, 'Date of Activity'])
         df.loc[i, 'Studio'] = string_and_nan_format(df.loc[i, 'Studio'])
         df.loc[i, 'Type'] = type_check(df.loc[i, 'Studio'])
         df.loc[i, 'Name'] = name_event(df.loc[i, 'Name'], df.loc[i, 'Event Name'])
@@ -137,163 +143,10 @@ def format_df(dataframe):
         df.loc[i, 'Hours'] = hours_check(df.loc[i, 'Hours'])
         df.loc[i, 'All Day'] = completeish(df.loc[i, 'Hours'])
         df.loc[i, 'Day'] = day_week(df.loc[i, 'Date of Activity'])
-        df.loc[i, 'Start Time'] = time_format(df.loc[i, 'Start Time'])
-        df.loc[i, 'End Time'] = time_format(df.loc[i, 'End Time'])
-    '''drop_list = []
-    for i in df.index:
-        if df.loc[i, 'Date of Activity'] == "delete me":
-            drop_list.append(i)
-        if df.loc[i, 'Days Prev'] == "delete me":
-            drop_list.append(i)
-        if pd.isnull(df.loc[i, 'Studio']) == True:
-            drop_list.append(i)
-    df = df.drop(drop_list)'''
-    return df
-
-
-# %% filtering
-use_advance_low = True
-use_advance_high = True
-use_source = True
-use_activity = True
-if days_advance_low == 0:
-    use_advance_low = False
-if days_advance_high == 0:
-    use_advance_high = False
-if source_filter == False:
-    use_source = False
-if activity_filter == False:
-    use_activity = False
-
-def filter_stats_data(dataframe):
-    df = dataframe.copy()
-    drop_list = total_check(df)
+        df.loc[i, 'Start Time'] = time_format(df.loc[i, 'Start Time'], df.loc[i, 'All Day'], 'start')
+        df.loc[i, 'End Time'] = time_format(df.loc[i, 'End Time'], df.loc[i, 'All Day'], 'end')
     df = df.drop(drop_list)
     return df
-
-
-def total_check(df):
-    afilter = afilter_fun()
-    drop_list = []
-    for i in df.index:
-        if (check_atlantic(df.loc[i, 'Name']) and
-            check_pit(df.loc[i, 'Name']) == True and
-            check_full_day(df.loc[i, 'All Day'], df.loc[i, 'Hours']) == True and
-            check_advance(df.loc[i, 'Days Prev']) == True and
-            check_date(df.loc[i, 'Date of Activity']) == True and
-            check_source(df.loc[i, 'Source']) == True and
-            check_activity(df.loc[i, 'Activity'], afilter) == True) == False:
-            drop_list.append(i)
-    return drop_list
-
-
-def afilter_fun():
-    if use_activity == True:
-        return activities.loc[1:, activity_filter]
-    else:
-        return pd.DataFrame()
-
-def check_atlantic(x):
-    if pd.isna(x):
-        return True
-    if atlantic == True:
-        if "atlantic" not in x.lower():
-            return True
-        else:
-            return False
-    else:
-        return True
-
-
-def check_pit(x):
-    if pd.isna(x):
-        return True
-    if pit == True:
-        if "the pit" in x.lower():
-            return False
-        else:
-            return True
-    else:
-        return True
-
-
-def check_full_day(x, y):
-    if pd.isnull(x):
-        x = False
-        if pd.isnull(y):
-            return True
-    if pd.isnull(y):
-        y = False
-    if full_day:
-        if x == False:
-            if y == 14:
-                return False
-            else:
-                return True
-        else:
-            return False
-    else:
-        return True
-
-
-def check_advance(x):
-    if pd.isna(x):
-        return True
-    if use_advance_low != True:
-        if use_advance_high == True:
-            if x >= days_advance_low:
-                if x <= days_advance_high:
-                    return True
-                else:
-                    return False
-            else:
-                return False
-        else:
-            return True
-    else:
-        return False
-
-
-def check_date(x):
-    if pd.isna(x):
-        return True
-    if use_date == True:
-        if (x >= date_range[0]) and (x <= date_range[1]) == True:
-            return True
-        else:
-            return False
-    else:
-        return True
-
-
-def check_source(x):
-    if use_source == True:
-        if pd.isna(x):
-            return False
-        for i in source_filter:
-            if i.lower() in x.lower():
-                return True
-        else:
-            return False
-    else:
-        return True
-
-
-def check_activity(x, afilter):
-    if use_activity == True:
-        if pd.isna(x):
-            return False
-        for i in afilter:
-            for j in afilter[i]:
-                if pd.isna(j):
-                    pass
-                elif j.lower() in x.lower():
-                    return True
-        else:
-            return False
-    else:
-        return True
-
 
 def df_string_in(df_col, df_strings):
     string_count = pd.DataFrame(columns = df_strings.columns.tolist())
@@ -312,7 +165,6 @@ def list_string_in(df_col, list_string):
         string_count.loc[0, i] = count
     return string_count
 
-
 # %% making the variables
 
 bookings = import_csv(file_loc)
@@ -329,10 +181,6 @@ weekend = ["Saturday", "Sunday"]
 studio_name = sorted(bookings.Studio.dropna().unique().tolist())
 studio_type = sorted(bookings.Type.dropna().unique().tolist())
 sources = sorted(bookings.Source.dropna().unique().tolist())
-
-
-# %% filtering lists
-
 
 activities_count = df_string_in(bookings['Activity'], activities)
 activities = pd.concat([activities_count, activities]).reset_index(drop = True)

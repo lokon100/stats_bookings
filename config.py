@@ -5,35 +5,43 @@ Created on Mon Dec 19 15:26:05 2022
 @author: Skye
 """
 
-import pandas as pd  # analysis:ignore
+import pandas as pd
 import numpy as np
 
 """file location; 1 is csv, 2 is xlsx"""
 version = 1
-file_location = 'C:/Users/Skye/Dropbox/Cre8ive Files/Python/Booking Stats/v0.1/Daily Bookings Log (current).csv'
+file_location = 'C:/Users/Skye/Dropbox/Cre8ive Files/Python/Booking Stats/v1.0/Daily Bookings Log.csv'
 
 """sifting values for overall filter"""
-filter_on = False
+studio_list = []
+use_studio = False
 
-atlantic = True
-pit = True
+day_list = []
+use_weekday = False
+
+source_list = []
+use_source = False
+
+activity_list = []
+use_activity = False
+
+atlantic = False
+
+pit = False
+
 full_day = False
+
+date_range = [(pd.to_datetime("August 1st 2022")), (pd.to_datetime("October 23rd 2023"))]
 use_date = False
-date_range = [(pd.Timestamp("September 1st 2022")).to_pydatetime(),
-              (pd.Timestamp("January 23rd 2023")).to_pydatetime()]
+
 days_advance_low = 0
 days_advance_high = 0
-source_filter = False # options: Direct Giggster Liquidspace Peerspace Skedda Spacebase Splacer Tagvenue Walk-In
-activity_filter = False # options: Exercise, Acting, Fashion, Activity, Buisness, Religion
-
-"""to use filters set booleans to False or input times/dates"""
+use_advance_low = True
+use_advance_high = True
 
 
+# %% filtering lists
 
-"""setting up activity and equipment lists"""
-
-
-# %%
 def make_filter_lists(df, array):
     for i, a in enumerate(array):
         if len(a) < len(df):
@@ -58,6 +66,7 @@ temp_list = [['dance', 'rehearsal', 'yoga', 'meditation', 'martial', 'soloist', 
               'development', 'training', 'network', 'retreat', 'summit'],
              ['religious', 'prayer', 'church', 'service']]
 activities = make_filter_lists(activities, temp_list)
+
 equipment = pd.DataFrame(columns=['Default', 'Extra', 'Sound', 'Setup', 'Fashion'])
 temp_list = [['chair', 'table'], ['projector', 'whiteboard', 'ring', 'light', 'tv'],
              ['speaker', 'music', 'sound', 'mic'], ['classroom', 'boardroom', 'circle'],

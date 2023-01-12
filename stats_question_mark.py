@@ -5,10 +5,8 @@ Created on Mon Dec 12 13:34:04 2022
 @author: Skye
 """
 
-import time  # analysis:ignore
-from operator import itemgetter  # analysis:ignore
-import pandas as pd  # analysis:ignore
-import numpy as np  # analysis:ignore
+import pandas as pd
+import numpy as np
 
 from variable_work import bookings, names_unique, studio_name, studio_type, week_names, weekday, weekend, list_length, activities, equipment, sources, sources_count  # analysis:ignore
 
@@ -255,15 +253,15 @@ def used_per_day(df, studios):
     df_studio = df[df['Studio'].isin(studios)]
     for i in week_names:
         day = df_studio[df_studio['Day'] == i]
-        day_df = pd.DataFrame()
         y = day.groupby(day['Date of Activity'].dt.date)['Hours'].agg('count')
         z = day.groupby(day['Date of Activity'].dt.date)['Hours'].agg('sum')
-        day_df.index = z.index
+        day_df = pd.DataFrame(columns=['sum', 'count', 'used'], index=z.index)
         day_df['sum'] = z
         day_df['count'] = y
         for j, a in enumerate(day_df.index):
             hours_total = day_df.iloc[j]['count'] * open_hours(i)
             used = round(((day_df.iloc[j]['sum']/hours_total)*100), 2)
+            if used > 100: used = 100
             day_df.loc[a, 'used'] = used
         used_list = (day_df['used']).tolist()
         dates = pd.Series(day_df.index)
@@ -285,6 +283,7 @@ def used_per_studio(df, s):
         sum_studio = float((studio.groupby(studio['Studio'])['Hours'].agg('sum')))
         hours_total = 14 * len(studio)
         used = round(((sum_studio/hours_total)*100), 2)
+        if used > 100: used = 100
         by_studio_average.loc[i] = [a, used]
     return by_studio_average
 
