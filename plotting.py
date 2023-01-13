@@ -8,8 +8,7 @@ Created on Tue Dec 20 14:05:48 2022
 # %% importing
 import matplotlib as mpl
 from matplotlib import pyplot as plt
-from matplotlib import dates as mdates
-from matplotlib.dates import MonthLocator, DateFormatter, WeekdayLocator # analysis:ignore
+from matplotlib.dates import MonthLocator, DateFormatter, DayLocator
 import numpy as np
 import pandas as pd
 import warnings
@@ -17,15 +16,14 @@ import warnings
 import variable_work as vw
 from variable_work import bookings, week_names, weekday, weekend, studio_name, studio_type, activities, equipment, sources_count, sources  # analysis:ignore
 
-from config import source_list, studio_list, activity_list, day_list
-
-from filtering import filter_stats_data
+from filtering import filter_stats_data, source_list, studio_list, activity_list, day_list # analysis:ignore
 
 import stats_question_mark as sqm
 import config as cg
 
 warnings.simplefilter('ignore', FutureWarning)
 mpl.rcParams['figure.dpi'] = 600
+
 
 # %% functions
 
@@ -587,10 +585,10 @@ def bookings_made_monthly(df, use):
     fig, ax = plt.subplots(layout="constrained")
     fig.suptitle("Num Bookings Made Over Time")
     ax.plot(x.index, x['count'])
-    ax.set(xlabel='Date', ylabel='Count')
+    ax.set(xlabel='Date (months)', ylabel='Count')
     date_form = DateFormatter("%m-%d-%y")
     ax.xaxis.set_major_formatter(date_form)
-    ax.xaxis.set_major_locator(mdates.MonthLocator(interval=1))
+    ax.xaxis.set_major_locator(MonthLocator(interval=1))
     plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
     ax.set_ylim(0, x['count'].max()+10)
     plt.savefig('filename.png', dpi=600)
@@ -605,10 +603,10 @@ def bookings_made_sources_monthly(df, use):
     fig.suptitle("Num Bookings Made Over Time By Source")
     ax.plot(x)
     ax.set_ylim(0, 80)
-    ax.set(xlabel='Date', ylabel='Count')
+    ax.set(xlabel='Date (months)', ylabel='Count')
     date_form = DateFormatter("%m-%d-%y")
     ax.xaxis.set_major_formatter(date_form)
-    ax.xaxis.set_major_locator(mdates.MonthLocator(interval=1))
+    ax.xaxis.set_major_locator(MonthLocator(interval=1))
     plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
     ax.legend(labels=x.columns)
 
@@ -618,12 +616,12 @@ def bookings_monthly(df, use):
         return
     weeks, x = make_date_booking(df, False)
     fig, ax = plt.subplots(layout="constrained")
-    fig.suptitle("Num Bookings Made Over Time")
+    fig.suptitle("Num Bookings Over Time")
     ax.plot(x.index, x['count'])
-    ax.set(xlabel='Date', ylabel='Count')
+    ax.set(xlabel='Date (months)', ylabel='Count')
     date_form = DateFormatter("%m-%d-%y")
     ax.xaxis.set_major_formatter(date_form)
-    ax.xaxis.set_major_locator(mdates.MonthLocator(interval=1))
+    ax.xaxis.set_major_locator(MonthLocator(interval=1))
     plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
     ax.set_ylim(0, x['count'].max()+10)
     plt.savefig('filename.png', dpi=600)
@@ -638,10 +636,10 @@ def bookings_sources_monthly(df, use):
     fig.suptitle("Num Bookings Over Time By Source")
     ax.plot(x)
     ax.set_ylim(0, 60)
-    ax.set(xlabel='Date', ylabel='Count')
+    ax.set(xlabel='Date (months)', ylabel='Count')
     date_form = DateFormatter("%m-%d-%y")
     ax.xaxis.set_major_formatter(date_form)
-    ax.xaxis.set_major_locator(mdates.MonthLocator(interval=1))
+    ax.xaxis.set_major_locator(MonthLocator(interval=1))
     plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
     ax.legend(labels=x.columns)
 
@@ -650,12 +648,13 @@ def bookings_made_weekly(df, use):
     if use == False:
         return
     weeks, x = make_date_booked(df, False)
-    labels = weeks[::2]
     fig, ax = plt.subplots(layout="constrained")
     fig.suptitle("Num Bookings Made Over Time")
     ax.plot(x.index, x['count'])
-    ax.set(xlabel='Date', ylabel='Count')
-    ax.set_xticks(pd.to_datetime(labels))
+    ax.set(xlabel='Date (weeks)', ylabel='Count')
+    date_form = DateFormatter("%m-%d-%y")
+    ax.xaxis.set_major_locator(DayLocator(interval=21))
+    ax.xaxis.set_major_formatter(date_form)
     ax.set_ylim(0, x['count'].max()+10)
     plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
     plt.savefig('filename.png', dpi=600)
@@ -665,14 +664,15 @@ def bookings_made_sources_weekly(df, use):
     if use == False:
         return
     weeks, x = make_date_booked(df, True)
-    labels = weeks[::2]
     x.index = pd.to_datetime(x.index)
     fig, ax = plt.subplots(layout="constrained")
     fig.suptitle("Num Bookings Made Over Time By Source")
     ax.plot(x)
     ax.set_ylim(0, 80)
-    ax.set(xlabel='Date', ylabel='Count')
-    ax.set_xticks(pd.to_datetime(labels))
+    ax.set(xlabel='Date (weeks)', ylabel='Count')
+    date_form = DateFormatter("%m-%d-%y")
+    ax.xaxis.set_major_locator(DayLocator(interval=21))
+    ax.xaxis.set_major_formatter(date_form)
     plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
     ax.legend(labels=x.columns)
 
@@ -681,12 +681,13 @@ def bookings_weekly(df, use):
     if use == False:
         return
     weeks, x = make_date_booking(df, False)
-    labels = weeks[::2]
     fig, ax = plt.subplots(layout="constrained")
-    fig.suptitle("Num Bookings Made Over Time")
+    fig.suptitle("Num Bookings Over Time")
     ax.plot(x.index, x['count'])
-    ax.set(xlabel='Date', ylabel='Count')
-    ax.set_xticks(pd.to_datetime(labels))
+    ax.set(xlabel='Date (weeks)', ylabel='Count')
+    date_form = DateFormatter("%m-%d-%y")
+    ax.xaxis.set_major_locator(DayLocator(interval=21))
+    ax.xaxis.set_major_formatter(date_form)
     plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
     ax.set_ylim(0, x['count'].max()+10)
     plt.savefig('filename.png', dpi=600)
@@ -702,10 +703,11 @@ def bookings_sources_weekly(df, use):
     fig.suptitle("Num Bookings Over Time By Source")
     ax.plot(x)
     ax.set_ylim(0, 60)
-    ax.set(xlabel='Date', ylabel='Count')
+    ax.set(xlabel='Date (weeks)', ylabel='Count')
     ax.set_xticks(pd.to_datetime(labels))
     plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
     ax.legend(labels=x.columns)
+
 
 
 # %% filtering
@@ -718,32 +720,49 @@ if filter_on == True:
 df = bookings_df.copy()
 
 
+
 # %% graphing
 
-hist_dur_studio(bookings_df, False)
-bar_use_studio(bookings_df, False)
-sub_bar_use_studio_titled(bookings_df, False)
-bar_bookings_day(bookings_df, False)
-hist_average_dur_studio(bookings_df, False)
-pie_sources_bookings(bookings_df, False)
-pie_sources_bookings_sans_direct(bookings_df, False)
-pie_sources_hours(bookings_df, False)
-pie_sources_hours_sans_direct(bookings_df, False)
-sub_hist_attendees_studio(bookings_df, False)
-sub_hist_duration_activities(bookings_df, False)
-sub_pie_duration_activities(bookings_df, False)
-overall_activities_duration_pie(bookings_df, False)
-sub_hist_attendees_activities(bookings_df, False)
-sub_pie_attendees_activities(bookings_df, False)
-overall_activities_attendees_pie(bookings_df, False)
-heat_time_used_daily(bookings_df, False)
-heat_time_used_weekly(bookings_df, False)
-heat_time_used_monthly(bookings_df, False)
-sub_bar_time_used_day(bookings_df, False)
-bookings_made_monthly(bookings_df, False)
-bookings_made_sources_monthly(bookings_df, False)
-bookings_monthly(bookings_df, False)
-bookings_sources_monthly(bookings_df, False)
+
+# attendees
+sub_hist_attendees_studio(df, False)
+sub_hist_attendees_activities(df, False)
+overall_activities_attendees_pie(df, False)
 
 
-# %% test zone
+# pie graphs
+pie_sources_bookings(df, False)
+pie_sources_bookings_sans_direct(df, False)
+pie_sources_hours(df, False)
+pie_sources_hours_sans_direct(df, False)
+sub_pie_duration_activities(df, False)
+sub_pie_attendees_activities(df, False)
+
+
+# duration
+hist_dur_studio(df, False)
+hist_average_dur_studio(df, False)
+sub_hist_duration_activities(df, False)
+overall_activities_duration_pie(df, False)
+
+
+# num bookings/made bookings
+bar_bookings_day(df, False)
+bookings_made_monthly(df, False)
+bookings_made_sources_monthly(df, False)
+bookings_monthly(df, False)
+bookings_sources_monthly(df, False)
+bookings_made_weekly(df, False)
+bookings_made_sources_weekly(df, False)
+bookings_weekly(df, False)
+bookings_sources_weekly(df, False)
+
+
+# amount used
+bar_use_studio(df, False)
+sub_bar_use_studio_titled(df, False)
+sub_bar_time_used_day(df, False)
+# heat graphs
+heat_time_used_daily(df, False)
+heat_time_used_weekly(df, False)
+heat_time_used_monthly(df, False)
