@@ -31,13 +31,13 @@ pit = False
 
 full_day = False
 
-date_range = [(pd.to_datetime("August 1st 2022")), (pd.to_datetime("October 23rd 2023"))]
+date_range = [(pd.to_datetime("August 1st 2022")), (pd.to_datetime("December 31st 2022"))]
 use_date = False
 
 days_advance_low = 0
 days_advance_high = 0
-use_advance_low = True
-use_advance_high = True
+use_advance_low = False
+use_advance_high = False
 
 
 # %% filtering lists
