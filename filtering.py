@@ -7,9 +7,9 @@ Created on Wed Jan 11 17:22:58 2023
 
 import pandas as pd
 
-from config import studio_list, day_list, source_list, activity_list, use_activity, use_advance_high, use_advance_low, use_source, use_date, atlantic, pit, full_day, date_range, days_advance_low, days_advance_high, use_weekday, use_studio, activities
+from config import studio_list, day_list, source_list, activity_list, use_activity, use_advance_high, use_advance_low, use_source, use_date, full_day, date_range, days_advance_low, days_advance_high, use_weekday, use_studio, activities, names, names_list
 
-from variable_work import studio_name, week_names, sources
+from variable_work import studio_name, week_names, sources, df_string_in, list_string_in
 
 activity_list = activity_list
 studio_list = studio_list
@@ -26,15 +26,19 @@ def filter_stats_data(dataframe):
     df = dataframe.copy()
     drop_list = total_check(df)
     df = df.drop(drop_list)
-    return df
+
+    activities_count = df_string_in(df['Activity'], activities)
+    ac = pd.concat([activities_count, activities]).reset_index(drop = True)
+
+    sc = list_string_in(df['Source'], sources)
+    return ac, sc, df
 
 
 def total_check(df):
     afilter = afilter_fun()
     drop_list = []
     for i in df.index:
-        if (check_atlantic(df.loc[i, 'Name']) and
-            check_pit(df.loc[i, 'Name']) == True and
+        if (check_names(df.loc[i, 'Name']) and
             check_full_day(df.loc[i, 'All Day'], df.loc[i, 'Hours']) == True and
             check_advance(df.loc[i, 'Days Prev']) == True and
             check_date(df.loc[i, 'Date of Activity']) == True and
@@ -53,24 +57,13 @@ def afilter_fun():
     else:
         return pd.DataFrame()
 
-def check_atlantic(x):
+def check_names(x):
     if pd.isna(x):
         return True
-    if atlantic == True:
-        if "atlantic" not in x.lower():
-            return True
-        else:
-            return False
-    else:
-        return True
-
-
-def check_pit(x):
-    if pd.isna(x):
-        return True
-    if pit == True:
-        if "the pit" in x.lower():
-            return False
+    if names == True:
+        for i in names_list:
+            if i == x.lower():
+                return False
         else:
             return True
     else:
@@ -160,8 +153,8 @@ def check_day(x):
         if pd.isna(x):
             return False
         for i in day_list:
-            if i.lower() in x.lower():
-                return False
+            if i.lower() == x.lower():
+                return True
         else:
             return False
     else:
@@ -173,9 +166,12 @@ def check_studio(x):
         if pd.isna(x):
             return False
         for i in studio_list:
-            if i.lower() in x.lower():
-                return False
+            if i == x:
+                return True
         else:
             return False
     else:
         return True
+
+
+# %% list making
