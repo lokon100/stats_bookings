@@ -17,7 +17,7 @@ from long_bookings import add_many_rows
 # %% importing function
 
 def import_csv(file_location):
-    file_data = pd.read_csv(file_location, encoding='ISO 8859-1')
+    file_data = pd.read_csv(file_location, encoding='ANSI')
 
     file_parsed = file_data[['Source', 'Date Booked', 'Date of Activity', 'Start Time',
                              'End Time', 'Studio', 'Name', 'Event Name', '# of Attendees', 'Activity', 'Equipment', 'Days Prev', 'Hours']]
@@ -54,6 +54,8 @@ def attendees_format(attendees):
 def string_and_nan_format(val):
     if pd.isnull(val) == True:
         return val
+    if val == 1 or val == '1':
+        return '1-1'
     else:
         return str(val).title().strip()
 
@@ -69,12 +71,17 @@ def real_check(date_booking):
     if pd.isnull(date_booking) == True:
         return date_booking
     else:
-        return pd.to_datetime(date_booking)
+        try:
+            return pd.to_datetime(date_booking)
+        except:
+            pass
 
 
 def name_event(name, event):
     if pd.isnull(name) == True:
         return str(event).title().strip()
+    if "atlantic" in str(name).lower():
+        return("Atlantic Theatre Company")
     else:
         return str(name).title().strip()
 
@@ -128,7 +135,7 @@ def format_df(dataframe):
     df = dataframe.copy()
     drop_list = []
     for i in df.index:
-        if pd.isna(df.loc[i, 'Hours']):
+        if pd.isna(df.loc[i, 'Start Time']):
             drop_list.append(i)
         df.loc[i, 'Source'] = source_check(df.loc[i, 'Source'])
         df.loc[i, 'Date Booked'] = real_check(df.loc[i, 'Date Booked'])
@@ -146,6 +153,7 @@ def format_df(dataframe):
         df.loc[i, 'Start Time'] = time_format(df.loc[i, 'Start Time'], df.loc[i, 'All Day'], 'start')
         df.loc[i, 'End Time'] = time_format(df.loc[i, 'End Time'], df.loc[i, 'All Day'], 'end')
     df = df.drop(drop_list)
+    df = df.drop(['Event Name'], axis=1)
     return df
 
 def df_string_in(df_col, df_strings):
@@ -182,10 +190,5 @@ studio_name = sorted(bookings.Studio.dropna().unique().tolist())
 studio_type = sorted(bookings.Type.dropna().unique().tolist())
 sources = sorted(bookings.Source.dropna().unique().tolist())
 
-activities_count = df_string_in(bookings['Activity'], activities)
-activities = pd.concat([activities_count, activities]).reset_index(drop = True)
-
 equipment_count = df_string_in(bookings['Equipment'], equipment)
 equipment = pd.concat([equipment_count, equipment]).reset_index(drop = True)
-
-sources_count = list_string_in(bookings['Source'], sources)

@@ -21,36 +21,37 @@ long_bookings = pd.DataFrame(columns=['Name', 'Date', 'Studio', 'Num Hours', 'St
 
 # %%% Pit Bookings
 
-pit = pd.date_range("20220924", "20230401")
+pit = pd.date_range("20230101", "20230630")
 long_bookings = add_row(long_bookings, pit, 'The Pit', '1-2', 24, '00:00:00', '23:00:00')
 
 # %%% Atlantic Bookings
 
-# fall 2022
-two_five = pd.date_range("20220825", "20221209")
-mon = pd.date_range("20220829", "20221207", freq='W-MON')
-wed = pd.date_range("20220829", "20221207", freq='W-WED')
-thurs = pd.date_range("20220829", "20221207", freq='W-THU')
-long_bookings = add_row(long_bookings, two_five, 'Atlantic Theater Studio', '2-5', 24, '00:00:00', '23:00:00')
-monwed = ['2-1', '2-2', '2-3', '2-4']
-for i in monwed:
-    long_bookings = add_row(long_bookings, mon, 'Atlantic Theater Studio', i, 9.5, '8:30:00', '16:00:00')
-    long_bookings = add_row(long_bookings, wed, 'Atlantic Theater Studio', i, 9.5, '8:30:00', '16:00:00')
-monthurs = ['1-1', '4']
-for i in monthurs:
-    long_bookings = add_row(long_bookings, mon, 'Atlantic Theater Studio', i, 9.5, '8:30:00', '16:00:00')
-    long_bookings = add_row(long_bookings, thurs, 'Atlantic Theater Studio', i, 9.5, '8:30:00', '16:00:00')
-
-
 # spring 2023
-two_five = pd.date_range("20230123", "20230605")
+two_five = pd.date_range("20230123", "20230505")
 mon = pd.date_range("20230123", "20230601", freq='W-MON')
 wed = pd.date_range("20230123", "20230601", freq='W-WED')
-long_bookings = add_row(long_bookings, two_five, 'Atlantic Theater Studio', '2-5', 24, '00:00:00', '23:00:00')
+long_bookings = add_row(long_bookings, two_five, 'Atlantic Theater Company', '2-5', 24, '00:00:00', '23:00:00')
 studios = ['1-1', '2-3', '2-4', '4']
 for i in studios:
-    long_bookings = add_row(long_bookings, mon, 'Atlantic Theater Studio', i, 9.5, '8:00:00', '16:30:00')
-    long_bookings = add_row(long_bookings, wed, 'Atlantic Theater Studio', i, 9.5, '8:00:00', '16:30:00')
+    long_bookings = add_row(long_bookings, mon, 'Atlantic Theater Company', i, 9.5, '8:30:00', '18:00:00')
+    long_bookings = add_row(long_bookings, wed, 'Atlantic Theater Company', i, 9.5, '8:30:00', '18:00:00')
+
+
+# summer 2023
+two_five = pd.date_range("20230706", "20230808")
+mon = pd.date_range("20230710", "20230804", freq='W-MON')
+tues = pd.date_range("20230710", "20230804", freq='W-TUE')
+wed = pd.date_range("20230710", "20230804", freq='W-WED')
+thurs = pd.date_range("20230710", "20230804", freq='W-THU')
+fri = pd.date_range("20230710", "20230804", freq='W-FRI')
+long_bookings = add_row(long_bookings, two_five, 'Atlantic Theater Company', '2-5', 24, '00:00:00', '23:00:00')
+studios = ['1-1', '2-4', '4']
+for i in studios:
+    long_bookings = add_row(long_bookings, mon, 'Atlantic Theater Company', i, 9.5, '8:30:00', '18:00:00')
+    long_bookings = add_row(long_bookings, tues, 'Atlantic Theater Company', i, 9.5, '8:30:00', '18:00:00')
+    long_bookings = add_row(long_bookings, wed, 'Atlantic Theater Company', i, 9.5, '8:30:00', '18:00:00')
+    long_bookings = add_row(long_bookings, thurs, 'Atlantic Theater Company', i, 9.5, '8:30:00', '18:00:00')
+    long_bookings = add_row(long_bookings, fri, 'Atlantic Theater Company', i, 9.5, '8:30:00', '18:00:00')
 
 
 # %% to send to main df

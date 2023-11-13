@@ -10,7 +10,7 @@ import numpy as np
 
 """file location; 1 is csv, 2 is xlsx"""
 version = 1
-file_location = 'C:/Users/Skye/Dropbox/Cre8ive Files/Python/Booking Stats/v1.0/Daily Bookings Log.csv'
+file_location = 'C:/Users/Skye/Dropbox/Cre8ive Files/Daily Bookings Log (current).csv'
 
 """sifting values for overall filter"""
 studio_list = []
@@ -25,13 +25,14 @@ use_source = False
 activity_list = []
 use_activity = False
 
-atlantic = False
+names = False
+names_list = ['atlantic theater company', 'the pit', 'abigail m.']
 
 pit = False
 
 full_day = False
 
-date_range = [(pd.to_datetime("August 1st 2022")), (pd.to_datetime("December 31st 2022"))]
+date_range = [(pd.to_datetime("January 1st 2023")), (pd.to_datetime("December 31st 2023"))]
 use_date = False
 
 days_advance_low = 0
@@ -54,17 +55,24 @@ def make_filter_lists(df, array):
 
 
 activities = pd.DataFrame(
-    columns=['Exercise', 'Acting', 'Fashion', 'Activity', 'Buisness', 'Religion'])
-temp_list = [['dance', 'rehearsal', 'yoga', 'meditation', 'martial', 'soloist', 'fight',
-              'ballet', 'taekwondo', 'choreo'],
-             ['improv', 'rehearsal', 'comedy', 'acting', 'reading', 'cast', 'performance',
-              'sketch'],
-             ['fitting', 'model', 'fashion'],
-             ['workshop', 'lesson', 'audition', 'photo', 'video', 'film', 'shoot',
-              'course', 'meetup', 'meet-up', 'event', 'art', 'shop', 'wedding', 'craft'],
-             ['meeting', 'team', 'group', 'interview', 'lecture', 'buisness',
-              'development', 'training', 'network', 'retreat', 'summit'],
-             ['religious', 'prayer', 'church', 'service']]
+    columns=['Exercise', 'Acting', 'Fashion', 'Activity', 'Religion', 'Office'])
+temp_list = [['dance', 'yoga', 'meditation', 'martial', 'soloist', 'fight',
+              'ballet', 'taekwondo', 'choreo', 'taichi', 'fitness', 'dancing', 'pilates',
+              'salsa', 'practice', 'capoeira'],
+             ['improv', 'comedy', 'acting', 'reading', 'cast', 'performance',
+              'sketch', 'theater', 'read', 'sing', 'script', 'scene', 'callback', 'band',
+              'audition', 'rehearsal', 'waiting room'],
+             ['fitting', 'model', 'fashion', 'wardrobe', 'make up', 'costume'],
+             ['audition', 'photo', 'video', 'film', 'shoot',
+              'meetup', 'meet-up', 'meet up', 'event', 'art', 'shop', 'wedding',
+              'craft', 'catwalk', 'movie', 'paint', 'game', 'headshot'],
+             ['religious', 'prayer', 'church', 'service', 'worship', 'bible'],
+             ['course', 'workshop', 'lesson', 'meeting', 'team', 'group', 'interview',
+              'lecture', 'buisness', 'development', 'training', 'network', 'retreat',
+              'summit', 'class', 'zoom', 'test', 'planning', 'interview', 'work',
+              'working', 'call', 'market', 'buisness', 'study', 'presentation', 'offsite',
+              'off-site', 'project', 'conference', 'session', 'mentor', 'therapy',
+              'panel', 'discussion', 'distribution', 'office']]
 activities = make_filter_lists(activities, temp_list)
 
 equipment = pd.DataFrame(columns=['Default', 'Extra', 'Sound', 'Setup', 'Fashion'])
